@@ -9,8 +9,6 @@ out live, rendered on raw HTML5 Canvas at a locked 60 FPS.
 
 🔗 **Live demo:** https://system-design-xi-blush.vercel.app/
 
-![Consistent Hashing Ring](./docs/screenshots/consistent-hashing.png)
-
 ---
 
 ## Why this exists
@@ -45,8 +43,6 @@ ever watching one actually run.
 * **Guided scenario:** scales the cluster to 5 nodes and measures the
   standard-deviation improvement in key distribution as it rebalances.
 
-![Consistent Hashing](./docs/screenshots/consistent-hashing.png)
-
 ### 🟢 Rate Limiter Comparison
 
 * **Algorithms:** Token Bucket, Leaky Bucket (as a meter/policer), and
@@ -59,7 +55,7 @@ ever watching one actually run.
 * **Guided scenario:** shows Token Bucket absorbing a burst that Sliding
   Window Log rejects, on identical traffic.
 
-![Rate Limiter Comparison](./docs/screenshots/rate-limiter.png)
+
 
 ### 🟣 Raft-lite Consensus
 
@@ -75,7 +71,7 @@ ever watching one actually run.
   keyboard users navigate nodes and trigger kill/revive with `Tab`, `Space`,
   `Enter` — no mouse required.
 
-![Raft Consensus](./docs/screenshots/raft-consensus.png)
+
 
 > **Scope note:** this implements leader election and quorum consensus only.
 > Log replication, snapshotting, and membership changes are intentionally
