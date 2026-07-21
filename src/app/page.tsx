@@ -1,65 +1,119 @@
-import Image from "next/image";
+"use client";
+
+import dynamic from "next/dynamic";
+import { useUiStore, TabId } from "@/stores/uiStore";
+import { Tabs } from "@/components/ui/Tabs";
+import { Sun, Moon, Zap, ZapOff } from "lucide-react";
+import { FpsMonitor } from "@/components/dev/FpsMonitor";
+import { AnimatePresence, motion } from "framer-motion";
+
+// Lazy load canvas modules with ssr: false as requested
+const ConsistentHashingModule = dynamic(
+  () => import("@/components/modules/ConsistentHashing/ConsistentHashingModule"),
+  { ssr: false }
+);
+
+const RateLimiterModule = dynamic(
+  () => import("@/components/modules/RateLimiter/RateLimiterModule"),
+  { ssr: false }
+);
+
+const RaftConsensusModule = dynamic(
+  () => import("@/components/modules/RaftConsensus/RaftConsensusModule"),
+  { ssr: false }
+);
 
 export default function Home() {
+  const {
+    activeTab,
+    theme,
+    reducedMotion,
+    setTab,
+    toggleTheme,
+    setReducedMotion,
+  } = useUiStore();
+
+  const tabItems = [
+    { id: "hashing" as const, label: "Consistent Hashing" },
+    { id: "rate-limiter" as const, label: "Rate Limiter" },
+    { id: "raft" as const, label: "Raft Consensus" },
+  ];
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="min-h-screen flex flex-col bg-background text-foreground transition-colors duration-150">
+      {/* Header */}
+      <header className="border-b border-[#8B8D93]/10 bg-[#17181B] px-6 py-4 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <span className="text-[#E8A33D] font-mono font-bold text-lg tracking-wider">
+            SYSTEM PLAYGROUND
+          </span>
+          <span className="text-[10px] bg-[#E8E6E1]/10 text-[#E8E6E1]/70 px-2 py-0.5 rounded font-mono uppercase tracking-wider">
+            v2.0
+          </span>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+
+        {/* Global Toolbar Controls */}
+        <div className="flex items-center gap-3">
+          {/* Reduced Motion Toggle */}
+          <button
+            onClick={() => setReducedMotion(!reducedMotion)}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border border-[#8B8D93]/10 text-xs text-[#E8E6E1]/70 hover:text-[#E8E6E1] hover:bg-[#0E0F11] transition-all cursor-pointer"
+            title={
+              reducedMotion ? "Enable animations" : "Disable animations (Reduced Motion)"
+            }
+            aria-label={
+              reducedMotion ? "Enable animations" : "Disable animations"
+            }
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            {reducedMotion ? <ZapOff size={14} /> : <Zap size={14} />}
+            <span className="hidden sm:inline font-mono">
+              Reduced Motion: {reducedMotion ? "ON" : "OFF"}
+            </span>
+          </button>
+
+          {/* Theme Toggle */}
+          <button
+            onClick={toggleTheme}
+            className="p-2 rounded-md border border-[#8B8D93]/10 text-[#E8E6E1]/70 hover:text-[#E8E6E1] hover:bg-[#0E0F11] transition-all cursor-pointer"
+            aria-label="Toggle theme"
           >
-            Documentation
-          </a>
+            {theme === "dark" ? <Sun size={15} /> : <Moon size={15} />}
+          </button>
+        </div>
+      </header>
+
+      {/* Main Content Area */}
+      <main className="flex-grow max-w-7xl w-full mx-auto p-6 flex flex-col gap-6">
+        {/* Navigation Tabs */}
+        <div className="max-w-md w-full self-center sm:self-start">
+          <Tabs
+            items={tabItems}
+            activeId={activeTab}
+            onChange={(id) => setTab(id as TabId)}
+          />
+        </div>
+
+        {/* Tab content wrapper with transitions */}
+        <div className="flex-grow flex flex-col">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeTab}
+              initial={reducedMotion ? { opacity: 1 } : { opacity: 0, y: 4 }}
+              animate={reducedMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+              exit={reducedMotion ? { opacity: 1 } : { opacity: 0, y: -4 }}
+              transition={{ duration: reducedMotion ? 0 : 0.15, ease: "easeOut" }}
+              className="flex-grow flex flex-col"
+            >
+              {activeTab === "hashing" && <ConsistentHashingModule />}
+              {activeTab === "rate-limiter" && <RateLimiterModule />}
+              {activeTab === "raft" && <RaftConsensusModule />}
+            </motion.div>
+          </AnimatePresence>
         </div>
       </main>
+
+      {/* FPS Monitor */}
+      <FpsMonitor />
     </div>
   );
 }
